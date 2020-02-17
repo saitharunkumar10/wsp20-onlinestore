@@ -1,5 +1,5 @@
 function show_page() {
-    show_page_secured()
+    auth('prodadmin@test.com',show_page_secured, '/login')
 }
 
 let products; //list of products read from db
