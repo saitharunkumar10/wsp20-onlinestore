@@ -14,7 +14,7 @@ function validate_summary(summary){
 
 function validate_price(price){
     if(!parseFloat(price))
-        return 'Error: Invalid price value ${price}'
+        return `Error: Invalid price value ${price}`
     else
         return null
 }
