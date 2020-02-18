@@ -1,6 +1,6 @@
 
 function home_page(){
-    auth('prodadmin@test.com',home_page_secured, '/login')
+    auth('prodadmin@test.com',home_page_secured, '/home')
 }
 
 function home_page_secured(){
