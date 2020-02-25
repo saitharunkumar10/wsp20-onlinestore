@@ -46,6 +46,10 @@
     <script src="js/home_page.js"></script>
     <script src="js/add_page.js"></script>
     <script src="js/show_page.js"></script>
+    <script src="js/sortn_page.js"></script>
+    <script src="js/sortp_page.js"></script>
+
+
 
     <script>
     const glPageContent = document.getElementById('page_content')
@@ -62,6 +66,12 @@
             add_page()
         } else if (currentPath == '/show'){
             show_page()
+        }
+        else if (currentPath == '/sortname'){
+            sortn_page()
+        }
+        else if (currentPath == '/sortprice'){
+            sortp_page()
         } else {
             window.location.href = '/'
         }

@@ -18,6 +18,9 @@ app.get('/login', frontendHandler);
 app.get('/home', frontendHandler);
 app.get('/add', frontendHandler);
 app.get('/show', frontendHandler);
+app.get('/sortname', frontendHandler);
+app.get('/sortprice', frontendHandler);
+
 
 
 

@@ -1,20 +1,34 @@
 function show_page() {
-    auth('prodadmin@test.com',show_page_secured, '/login')
+    auth('prodadmin@test.com', show_page_secured, '/login')
 }
 
 let products; //list of products read from db
+
 
 async function show_page_secured() {
     glPageContent.innerHTML = '<h1>Show Page</h1>'
     glPageContent.innerHTML += `
     <a href='/home' class="btn btn-outline-primary">Home</a>
     <a href='/add' class="btn btn-outline-primary">Add a Product</a>
+    <div class="btn-group" role="group">
+    <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Show By
+    </button>
+    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">       
+      <a class="dropdown-item" href="/sortname"  onclick="sortname();" >NAME</a>
+      <a class="dropdown-item" href="/sortprice"  onclick="sortprice();">PRICE</a>
+    </div>
+    </div>
     </br>
     `;
 
+
+  
     try {
         products = []
-        const snapshot = await firebase.firestore().collection(COLLECTION).get()
+        const snapshot = await firebase.firestore().collection(COLLECTION)
+            
+            .get()
         snapshot.forEach(doc => {
             const { name, summary, price, image, image_url } = doc.data()
             const p = { docId: doc.id, name, summary, price, image, image_url }
@@ -50,16 +64,16 @@ async function show_page_secured() {
 
         `;
     }
-} 
+}
 
-let cardOriginal 
+let cardOriginal
 let imageFile2Update
 
- function editProduct(index){
-const p = products[index]
-const card = document.getElementById(p.docId)
-cardOriginal = card.innerHTML
-card.innerHTML =`
+function editProduct(index) {
+    const p = products[index]
+    const card = document.getElementById(p.docId)
+    cardOriginal = card.innerHTML
+    card.innerHTML = `
  <div class="form-group">
             Name: <input class="form-control" type="text" id="name" value="${p.name}" />
             <p id="name_error" style="color:red;" />
@@ -83,11 +97,12 @@ card.innerHTML =`
    
 `;
 
-const imageButton = document.getElementById('imageButton')
-imageButton.addEventListener('change', e =>{
-    imageFile2Update = e.target.files[0]
-})
+    const imageButton = document.getElementById('imageButton')
+    imageButton.addEventListener('change', e => {
+        imageFile2Update = e.target.files[0]
+    })
 }
+
 
 async function update(index) {
     const p = products[index]
@@ -104,65 +119,65 @@ async function update(index) {
     summaryErrorTag.innerHTML = validate_summary(newSummary)
     priceErrorTag.innerHTML = validate_price(newPrice)
 
-    if(nameErrorTag.innerHTML || summaryErrorTag.innerHTML
-        || priceErrorTag.innerHTML ){        
-            return
+    if (nameErrorTag.innerHTML || summaryErrorTag.innerHTML
+        || priceErrorTag.innerHTML) {
+        return
     }
 
-// ready to update
+    // ready to update
 
-let updated = false
-const newInfo = {}
-if (p.name !== newName){
-    newInfo.name = newName
-    updated = true
-}
-if (p.summary !== newSummary){
-    newInfo.summary = newSummary
-    updated = true
-}
-if (p.price !== newPrice){
-    newInfo.price = Number(Number(newPrice).toFixed(2))
-    updated = true
-}
-    if(imageFile2Update){
+    let updated = false
+    const newInfo = {}
+    if (p.name !== newName) {
+        newInfo.name = newName
+        updated = true
+    }
+    if (p.summary !== newSummary) {
+        newInfo.summary = newSummary
+        updated = true
+    }
+    if (p.price !== newPrice) {
+        newInfo.price = Number(Number(newPrice).toFixed(2))
+        updated = true
+    }
+    if (imageFile2Update) {
         updated = TextTrackCue
     }
-    if (!updated){
+    if (!updated) {
         cancel(index)
         return
     }
 
     //update db
     try {
-        if (imageFile2Update){
+        if (imageFile2Update) {
             const imageRef2del = firebase.storage().ref().child(IMAGE_FOLDER + p.image)
             await imageRef2del.delete()
             const image = Date.now() + imageFile2Update.name
             const newImageRef = firebase.storage().ref(IMAGE_FOLDER + image)
             const taskSnapshot = await newImageRef.put(imageFile2Update)
-            const image_url = await taskSnapshot.ref.getDownloadURL()          
+            const image_url = await taskSnapshot.ref.getDownloadURL()
             newInfo.image = image
             newInfo.image_url = image_url
         }
 
-       
+
         await firebase.firestore().collection(COLLECTION).doc(p.docId).update(newInfo)
         window.location.href = '/show'
-    } catch (e){
+    } catch (e) {
         glPageContent.innerHTML = 'Firestore/Storage update error<br>' + JSON.stringify(e)
     }
 
 }
 
-function cancel(index){
-const p = products[index]
-const card = document.getElementById(p.docId)
-card.innerHTML= cardOriginal
+function cancel(index) {
+    const p = products[index]
+    const card = document.getElementById(p.docId)
+    card.innerHTML = cardOriginal
 
 }
- async function deleteProduct(index){
-    try{
+async function deleteProduct(index) {
+    try {
         const p = products[index]
         //delete 1.firestore doc, 2 storage image
         console.log('doc')
@@ -171,20 +186,22 @@ card.innerHTML= cardOriginal
         console.log('image')
 
         await imageRef.delete()
-        
+
 
         //card id...
         const card = document.getElementById(p.docId)
-       
+
         card.parentNode.removeChild(card)
-        
+
 
         delete products[index]
-       
+
 
     } catch (e) {
-        
+
 
         glPageContent.innerHTML = 'Delete Error: <br>' + JSON.stringify(e)
     }
 }
+
+
