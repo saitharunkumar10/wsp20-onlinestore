@@ -44,7 +44,7 @@ try {
 if (products.length === 0) {
 	glPageContent.innerHTML += '<h1>No product in the database</h1>'
 	return
-}
+} 
 
 for (let index = 0; index < products.length; index++) {
 	const p = products[index]
