@@ -10,11 +10,11 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="css/my.css">
-    <title>Product Admin</title>
+    <title></title>
 </head>
 
 <body>
-    <h1 class="display-5" style="background-color: blue; color: white;">Product Admin's Page</h1>
+    <h1 class="display-5" style="background-color: blue; color: white;"></h1>
     <div class="jumbotron" id="page_content"></div>
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->
@@ -48,6 +48,8 @@
     <script src="js/show_page.js"></script>
     <script src="js/sortn_page.js"></script>
     <script src="js/sortp_page.js"></script>
+    <script src="js/pass.js"></script>
+
 
 
 
@@ -69,6 +71,9 @@
         }
         else if (currentPath == '/sortname'){
             sortn_page()
+        }
+        else if (currentPath == '/pass'){
+            pass()
         }
         else if (currentPath == '/sortprice'){
             sortp_page()

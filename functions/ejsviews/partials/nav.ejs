@@ -16,6 +16,9 @@
         <li class="nav-item <%= page ==='profile' ? 'active' : '' %>">
             <a class="nav-link" href="/b/profile">Profile</a>
          </li>
+         <li class="nav-item <%= page ==='password' ? 'active' : '' %>">
+             <a class="nav-link" href="/b/password">Password</a>
+         </li>
         <% if (!user) { %>
         <li class="nav-item <%= page ==='signin' ? 'active' : '' %>">
            <a class="nav-link" href="/b/signin">Sign In</a>

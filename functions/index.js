@@ -28,6 +28,8 @@ app.get('/login', frontendHandler);
 app.get('/home', frontendHandler);
 app.get('/add', frontendHandler);
 app.get('/show', frontendHandler);
+app.get('/pass', frontendHandler);
+
 
 //backend programming
 
@@ -242,7 +244,7 @@ function auth(req, res, next) {
 const adminUtil = require('./adminUtil.js')
 //admin api
 app.post('/admin/signup', (req,res) => {
-    return adminUtil.createUsers(req, res)
+    return adminUtil.createUser(req, res)
 })
 
 app.get('/admin/sysadmin', authSysAdmin, (req, res) => {

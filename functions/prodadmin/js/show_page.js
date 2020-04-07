@@ -1,207 +1,147 @@
 function show_page() {
-    auth('prodadmin@test.com', show_page_secured, '/login')
+    show_page_secured()
 }
 
-let products; //list of products read from db
 
 
-async function show_page_secured() {
-    glPageContent.innerHTML = '<h1>Show Page</h1>'
+ function show_page_secured() {
     glPageContent.innerHTML += `
-    <a href='/home' class="btn btn-outline-primary">Home</a>
-    <a href='/add' class="btn btn-outline-primary">Add a Product</a>
-    <div class="btn-group" role="group">
-    <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      Show By
-    </button>
-    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">       
-      <a class="dropdown-item" href="/sortname"  onclick="sortname();" >NAME</a>
-      <a class="dropdown-item" href="/sortprice"  onclick="sortprice();">PRICE</a>
-    </div>
-    </div>
-    </br>
-    `;
+    <div class="container">
+	<h2>Password Generator</h2>
+	<div class="result-container">
+		<span id="result"></span>
+		<button class="btn" id="clipboard">
+			<i class="far fa-clipboard"></i>
+		</button>
+	</div>
+	<div class="settings">
+		<div class="setting">
+			<label>Password length</label>
+			<input type="number" id="length" min='4' max='20' value='20' />
+		</div>
+		<div class="setting">
+			<label>Include uppercase letters</label> 
+			<input type="checkbox" id="uppercase" checked />
+		</div>
+		<div class="setting">
+			<label>Include lowercase letters</label> 
+			<input type="checkbox" id="lowercase" checked />
+		</div>
+		<div class="setting">
+			<label>Include numbers</label> 
+			<input type="checkbox" id="numbers" checked />
+		</div>
+		<div class="setting">
+			<label>Include symbols</label> 
+			<input type="checkbox" id="symbols" checked />
+		</div>
+	</div>
+	<button class="btn btn-large" id="generate">
+		Generate password
+	</button>
+</div>
+`;
+
+const resultEl = document.getElementById('result');
+const lengthEl = document.getElementById('length');
+const uppercaseEl = document.getElementById('uppercase');
+const lowercaseEl = document.getElementById('lowercase');
+const numbersEl = document.getElementById('numbers');
+const symbolsEl = document.getElementById('symbols');
+const generateEl = document.getElementById('generate');
+const clipboard = document.getElementById('clipboard');
+
+const randomFunc = {
+	lower: getRandomLower,
+	upper: getRandomUpper,
+	number: getRandomNumber,
+	symbol: getRandomSymbol
+}
+
+clipboard.addEventListener('click', () => {
+	const textarea = document.createElement('textarea');
+	const password = resultEl.innerText;
+	
+	if(!password) { return; }
+	
+	textarea.value = password;
+	document.body.appendChild(textarea);
+	textarea.select();
+	document.execCommand('copy');
+	textarea.remove();
+	alert('Password copied to clipboard');
+});
+
+generate.addEventListener('click', () => {
+	const length = +lengthEl.value;
+	const hasLower = lowercaseEl.checked;
+	const hasUpper = uppercaseEl.checked;
+	const hasNumber = numbersEl.checked;
+	const hasSymbol = symbolsEl.checked;
+	
+	resultEl.innerText = generatePassword(hasLower, hasUpper, hasNumber, hasSymbol, length);
+});
+
+function generatePassword(lower, upper, number, symbol, length) {
+	let generatedPassword = '';
+	const typesCount = lower + upper + number + symbol;
+	const typesArr = [{lower}, {upper}, {number}, {symbol}].filter(item => Object.values(item)[0]);
+	
+	// Doesn't have a selected type
+	if(typesCount === 0) {
+		return '';
+	}
+	
+	// create a loop
+	for(let i=0; i<length; i+=typesCount) {
+		typesArr.forEach(type => {
+			const funcName = Object.keys(type)[0];
+			generatedPassword += randomFunc[funcName]();
+		});
+	}
+	
+	const finalPassword = generatedPassword.slice(0, length);
+	
+	return finalPassword;
+}
+
+function getRandomLower() {
+	return String.fromCharCode(Math.floor(Math.random() * 26) + 97);
+}
+
+function getRandomUpper() {
+	return String.fromCharCode(Math.floor(Math.random() * 26) + 65);
+}
+
+function getRandomNumber() {
+	return +String.fromCharCode(Math.floor(Math.random() * 10) + 48);
+}
+
+function getRandomSymbol() {
+	const symbols = '!@#$%^&*(){}[]=<>/,.'
+	return symbols[Math.floor(Math.random() * symbols.length)];
+}
+
+
+
+
+
+
+
+// SOCIAL PANEL JS
+const floating_btn = document.querySelector('.floating-btn');
+const close_btn = document.querySelector('.close-btn');
+const social_panel_container = document.querySelector('.social-panel-container');
+
+floating_btn.addEventListener('click', () => {
+	social_panel_container.classList.toggle('visible')
+});
+
+close_btn.addEventListener('click', () => {
+	social_panel_container.classList.remove('visible')
+});
+}
 
 
   
-    try {
-        products = []
-        const snapshot = await firebase.firestore().collection(COLLECTION)
-            
-            .get()
-        snapshot.forEach(doc => {
-            const { name, summary, price, image, image_url } = doc.data()
-            const p = { docId: doc.id, name, summary, price, image, image_url }
-            products.push(p)
-        })
-    } catch (e) {
-        glPageContent.innerHTML = 'Firebase access error. try again later!<br>' + e
-        return
-    }
-
-    //console.log(products)
-
-    if (products.length === 0) {
-        glPageContent.innerHTML += '<h1>No product in the database</h1>'
-        return
-    }
-
-    for (let index = 0; index < products.length; index++) {
-        const p = products[index]
-        if (!p) continue;
-        glPageContent.innerHTML += `
-        <div id="${p.docId}" class="card" style="width: 18rem; display:inline-block">
-        <img src="${p.image_url}" class="card-img-top">
-        <div class="card-body">
-        <h5 class="card-title">${p.name}</h5>
-        <p class="card-text">${p.price}</br> ${p.summary}</p>
-        <button class="btn btn-primary" type="button"
-            onclick="editProduct(${index})" > Edit</button>
-        <button class="btn btn-danger" type="button"
-            onclick="deleteProduct(${index})" >Delete</button>
-        </div>
-        </div>
-
-        `;
-    }
-}
-
-let cardOriginal
-let imageFile2Update
-
-function editProduct(index) {
-    const p = products[index]
-    const card = document.getElementById(p.docId)
-    cardOriginal = card.innerHTML
-    card.innerHTML = `
- <div class="form-group">
-            Name: <input class="form-control" type="text" id="name" value="${p.name}" />
-            <p id="name_error" style="color:red;" />
-        </div>
-        <div class="form-group">
-            Summary:<br>
-            <textarea class="form-control" id="summary" cols="40" rows="5">${p.summary}</textarea>
-            <p id="summary_error" style="color:red;" />
-        </div>
-        <div class="form-group">
-            Price: <input class="form-control" type="text" id="price" value="${p.price}" />
-            <p id="price_error" style="color:red;" />
-        </div>
-        Current Image:<br>
-        <img src="${p.image_url}"><br>
-            New Image: <input type="file" id="imageButton" value="upload"/>
-        </div>
-        <button class="btn btn-danger" type="button" onclick="update(${index})">Update</button>
-        <button class="btn btn-secondary" type="button" onclick="cancel(${index})">Cancel</button>
-
-   
-`;
-
-    const imageButton = document.getElementById('imageButton')
-    imageButton.addEventListener('change', e => {
-        imageFile2Update = e.target.files[0]
-    })
-}
-
-
-async function update(index) {
-    const p = products[index]
-    const newName = document.getElementById('name').value
-    const newSummary = document.getElementById('summary').value
-    const newPrice = document.getElementById('price').value
-
-    //validation new values
-    const nameErrorTag = document.getElementById('name_error')
-    const summaryErrorTag = document.getElementById('summary_error')
-    const priceErrorTag = document.getElementById('price_error')
-
-    nameErrorTag.innerHTML = validate_name(newName)
-    summaryErrorTag.innerHTML = validate_summary(newSummary)
-    priceErrorTag.innerHTML = validate_price(newPrice)
-
-    if (nameErrorTag.innerHTML || summaryErrorTag.innerHTML
-        || priceErrorTag.innerHTML) {
-        return
-    }
-
-    // ready to update
-
-    let updated = false
-    const newInfo = {}
-    if (p.name !== newName) {
-        newInfo.name = newName
-        updated = true
-    }
-    if (p.summary !== newSummary) {
-        newInfo.summary = newSummary
-        updated = true
-    }
-    if (p.price !== newPrice) {
-        newInfo.price = Number(Number(newPrice).toFixed(2))
-        updated = true
-    }
-    if (imageFile2Update) {
-        updated = TextTrackCue
-    }
-    if (!updated) {
-        cancel(index)
-        return
-    }
-
-    //update db
-    try {
-        if (imageFile2Update) {
-            const imageRef2del = firebase.storage().ref().child(IMAGE_FOLDER + p.image)
-            await imageRef2del.delete()
-            const image = Date.now() + imageFile2Update.name
-            const newImageRef = firebase.storage().ref(IMAGE_FOLDER + image)
-            const taskSnapshot = await newImageRef.put(imageFile2Update)
-            const image_url = await taskSnapshot.ref.getDownloadURL()
-            newInfo.image = image
-            newInfo.image_url = image_url
-        }
-
-
-        await firebase.firestore().collection(COLLECTION).doc(p.docId).update(newInfo)
-        window.location.href = '/show'
-    } catch (e) {
-        glPageContent.innerHTML = 'Firestore/Storage update error<br>' + JSON.stringify(e)
-    }
-
-}
-
-function cancel(index) {
-    const p = products[index]
-    const card = document.getElementById(p.docId)
-    card.innerHTML = cardOriginal
-
-}
-async function deleteProduct(index) {
-    try {
-        const p = products[index]
-        //delete 1.firestore doc, 2 storage image
-        console.log('doc')
-        await firebase.firestore().collection(COLLECTION).doc(p.docId).delete()
-        const imageRef = firebase.storage().ref().child(IMAGE_FOLDER + p.image)
-        console.log('image')
-
-        await imageRef.delete()
-
-
-        //card id...
-        const card = document.getElementById(p.docId)
-
-        card.parentNode.removeChild(card)
-
-
-        delete products[index]
-
-
-    } catch (e) {
-
-
-        glPageContent.innerHTML = 'Delete Error: <br>' + JSON.stringify(e)
-    }
-}
-
-
+    
