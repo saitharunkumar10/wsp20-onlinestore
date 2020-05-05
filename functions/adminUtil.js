@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+//const nodemailer = require("nodemailer");
 var admin = require("firebase-admin");
 
 var serviceAccount = require("./saik-wsp20-firebase-adminsdk-hcy5x-d29354d4a3.json");
@@ -107,33 +107,33 @@ const createEmailPayload = (carts) => {
 }
 
 
-async function checkOut(data) {
-    data.timestamp = admin.firestore.Timestamp.fromDate(new Date())
-    const {user} = data;
-    let email_payload = await createEmailPayload(data.cart);
-    await mailer.send({
-        action: "order_checkout",
-        send_to: user.email,
-        subject: "Order Invoice!",
-        data: {user: user.email, grand:email_payload.sum, results: email_payload.results},
-      });
-    try{
-    const collection = admin.firestore().collection(Constants.COLL_ORDERS)
-    await collection.doc().set(data)
-    } catch (e){
-        throw e
-    }
-}
-
-// async function checkOut(data){
+// async function checkOut(data) {
 //     data.timestamp = admin.firestore.Timestamp.fromDate(new Date())
+//     const {user} = data;
+//     let email_payload = await createEmailPayload(data.cart);
+//     await mailer.send({
+//         action: "order_checkout",
+//         send_to: user.email,
+//         subject: "Order Invoice!",
+//         data: {user: user.email, grand:email_payload.sum, results: email_payload.results},
+//       });
 //     try{
-//         const collection = admin.firestore().collection(Constants.COLL_ORDERS)
-//         await collection.doc().set(data)
-//     } catch (e) {
+//     const collection = admin.firestore().collection(Constants.COLL_ORDERS)
+//     await collection.doc().set(data)
+//     } catch (e){
 //         throw e
 //     }
 // }
+
+async function checkOut(data){
+    data.timestamp = admin.firestore.Timestamp.fromDate(new Date())
+    try{
+        const collection = admin.firestore().collection(Constants.COLL_ORDERS)
+        await collection.doc().set(data)
+    } catch (e) {
+        throw e
+    }
+}
 
 module.exports = {
     createUser,
