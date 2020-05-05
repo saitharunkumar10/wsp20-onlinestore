@@ -63,25 +63,116 @@ const firebaseConfig = {
   
   const adminUtil = require('./adminUtil.js')
   const Constants = require('./myconstants.js')
+  
+  
+  
+  var size
+  let key=1
+  var finalsum
+  let compute=0
+  let limiter=10
 
-app.get('/', auth, async (req, res) => {
-    //console.log('=========', req.decodedIdToken ? req.decodedIdToken.email : 'no user')
-    const cartCount = req.session.cart ? req.session.cart.length : 0
+app.get('/',auth, async(req,res) => {
+    const cartCount = req.session.cart ? req.session.cart.length : 0 
+
     const coll = firebase.firestore().collection(Constants.COLL_PRODUCTS)
-    try {
-        let products = []
-        const snapshot = await coll.orderBy("name").get()
-        snapshot.forEach(doc => {
-            products.push({id: doc.id, data: doc.data()})
-        })
-        res.setHeader('Cache-Control', 'private');
-        res.render('storefront.ejs', {error: false, products, user: req.decodedIdToken, cartCount})
-    } catch (e) {
-        res.setHeader('Cache-Control', 'private');
-        res.render('storefront.ejs', {error: e, user: req.decodedIdToken, cartCount})
 
+    try{
+        let products = []
+        const snapshot = await coll.orderBy("name").limit(10).get()
+        
+        snapshot.forEach(doc =>{
+            products.push({id: doc.id, data: doc.data()})
+                 
+        });
+        var l
+        end =snapshot.docs[snapshot.docs.length-1];
+         l=snapshot.docs.length
+         start=snapshot.docs[snapshot.docs.length-l];
+        
+         
+       
+
+         finalsum=  await coll.get()
+         size = finalsum.size
+         compute=size/limiter
+
+
+        res.setHeader('Cache-Control','private'); 
+        res.render('storefront.ejs',{error: false, products,user: req.decodedIdToken, cartCount,finalsum,key,compute})
+
+    } catch (e){
+        res.setHeader('Cache-Control','private');
+        res.render('storefront.ejs',{error: e, user: req.decodedIdToken,cartCount,finalsum})
     }
 })
+
+  var start
+  var end
+
+app.post('/b/next',auth,async(req,res)=>{
+    const cartCount = req.session.cart ? req.session.cart.length : 0 
+
+    const coll = firebase.firestore().collection(Constants.COLL_PRODUCTS)
+
+    
+    try{
+        let products = []
+        const snapshot = await coll.orderBy("name").startAfter(end.data().name).limit(10).get()
+        //const snapshot = await coll.orderBy("name").startAfter(end).limit(2).get()
+        snapshot.forEach(doc =>{
+           products.push({id: doc.id, data: doc.data()})
+
+        });
+    
+        end = snapshot.docs[snapshot.docs.length-1];
+        l=snapshot.docs.length
+
+        start=snapshot.docs[snapshot.docs.length-l];
+
+        key++
+          
+              
+         res.setHeader('Cache-Control','private');
+         res.render('storefront.ejs',{error: false, products,user: req.decodedIdToken, cartCount,finalsum,key,compute});
+     
+            
+    } catch (e){
+        res.setHeader('Cache-Control','private');
+        res.render('storefront.ejs',{error: e, user: req.decodedIdToken,cartCount,finalsum})
+    }
+})
+app.post('/b/previous',auth,async(req,res)=>{
+    const cartCount = req.session.cart ? req.session.cart.length : 0 
+
+    const coll = firebase.firestore().collection(Constants.COLL_PRODUCTS)
+
+    try{
+        let products = []
+        const snapshot = await coll.orderBy("name").endBefore(start.data().name).limitToLast(10).get()
+
+        snapshot.forEach(doc =>{
+           products.push({id: doc.id, data: doc.data()})
+        });
+
+        end = snapshot.docs[snapshot.docs.length-1];
+        l=snapshot.docs.length
+
+        start=snapshot.docs[snapshot.docs.length-l];
+        let fir=[snapshot.docs.length];
+        key--
+              
+        res.setHeader('Cache-Control','private');
+        res.render('storefront.ejs',{error: false, products,user: req.decodedIdToken, cartCount,compute,key});
+        
+            
+    } catch (e){
+        res.setHeader('Cache-Control','private');
+        res.render('storefront.ejs',{error: e, user: req.decodedIdToken,cartCount,finalsum})
+    }
+})
+
+
 
 app.get('/b/about', auth, (req, res) => {
     const cartCount = req.session.cart ? req.session.cart.length : 0
@@ -206,6 +297,7 @@ app.post('/b/checkout', authAndRedirectSignIn, async (req, res) =>{
     // cart=[{product, qty} ....] // contents in shoppingcart
 
     const data = {
+        user: req.decodedIdToken,
         uid: req.decodedIdToken.uid,
         //timestamp: firebase.firestore.Timestamp.fromDate(new Date()),
         cart: req.session.cart
@@ -217,12 +309,15 @@ app.post('/b/checkout', authAndRedirectSignIn, async (req, res) =>{
         res.setHeader('Cache-Control', 'private');
         return res.render('shoppingcart.ejs',
             {message: 'Checked Out Successfully!', cart: new ShoppingCart(), user: req.decodedIdToken, cartCount: 0})
+            
     } catch (e) {
         const cart = ShoppingCart.deserialize(req.session.cart)
         res.setHeader('Cache-Control', 'private');
         return res.render('shoppingcart.ejs',
         {message: 'Checked Out Failed. Try Again Later!', cart, user: req.decodedIdToken, cartCount: cart.contents.length})
     }
+
+
 })
 
 app.get('/b/orderhistory', authAndRedirectSignIn, async (req, res) => {
@@ -238,6 +333,7 @@ app.get('/b/orderhistory', authAndRedirectSignIn, async (req, res) => {
 })
 
 //middleware
+
 async function authAndRedirectSignIn(req, res, next) {
     try{
         const decodedIdToken = await adminUtil.verifyIdToken(req.session.idToken)

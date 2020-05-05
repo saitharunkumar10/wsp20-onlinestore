@@ -19,16 +19,23 @@
 
     <% } else { %>
 
-    <% for (let p of products) { %>
+        <% for (let p of products) { %>
         <div class="card" style="width: 18rem; display: inline-block">
             <img src="<%= p.data.image_url %>" class="card-img-top" >
             <div class="card-body">
               <h5 class="card-title"><%= p.data.name %></h5>
               <p class="card-text">$(<%= p.data.price %>) <br> <%= p.data.summary %></p>
-              <form action="/b/add2cart" method="post">
+                <% if( p.data.quantity == 0) { %>
+                
+                <p class="card-text">No stock</p>
+                <% }else{ %>
+                  <p class="card-text">In stock(<%= p.data.quantity %>)</p>
+                <form action="/b/add2cart" method="post">
                 <input type="hidden" name="docId" value="<%= p.id %>">
                 <button type="submit" class="btn btn-primary">Add to ShoppingCart</button>
+            <%}%>
               </form>
+            
             </div>
           </div>
         <% } %>
@@ -37,5 +44,30 @@
     <%- include('partials/scripts.ejs') %>
 
      </body>
+     <div>
+      <div> 
+          <% if (key > 1){ %>
+        <form action="/b/previous" method="post">
+          <input type="hidden" name="docId" value=" name ">
+          <button type="submit" class="btn btn-primary">previous</button>
+          <% } else { %>
+          <button type="submit" class="btn btn-primary" disabled>previous</button>
+          <% } %>
+        </form>
+      </div>
+      <div> 
+         <% if (compute > key) { %>
+      <form action="/b/next" method="post">
+        <input type="hidden" name="docId" value=" name ">
+        <button type="submit" class="btn btn-primary">next</button>
 
-</html>
+        <% } else { %>
+          <button type="submit" class="btn btn-primary"disabled>next</button>
+
+        <% } %>
+      </form>
+    </div>
+    
+      </form>
+    </div>
+     </html>

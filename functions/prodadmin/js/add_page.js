@@ -23,6 +23,10 @@ function add_page_secured() {
             <p id="price_error" style="color:red;" />
         </div>
         <div class="form-group">
+            Quantity <input class="form-control" type="text" id="quantity" />
+            <p id="quantity_error" style="color:red;" />
+        </div>
+        <div class="form-group">
             Image: <input type="file" id="imageButton" value="upload" />
             <p id="image_error" style="color:red;" />
         </div>
@@ -40,20 +44,23 @@ async function addProduct() {
     const name = document.getElementById('name').value
     const summary = document.getElementById('summary').value
     let price = document.getElementById('price').value
+    let quantity = document.getElementById('quantity').value
 
         // input validation 
     const nameErrorTag = document.getElementById('name_error')
     const summaryErrorTag = document.getElementById('summary_error')
     const priceErrorTag = document.getElementById('price_error')
+    const quantityErrorTag = document.getElementById('quantity_error')
     const imageErrorTag = document.getElementById('image_error')
 
     nameErrorTag.innerHTML = validate_name(name)
     summaryErrorTag.innerHTML = validate_summary(summary)
     priceErrorTag.innerHTML = validate_price(price)
+    quantityErrorTag.innerHTML = validate_quantity(quantity)
     imageErrorTag.innerHTML = !glImageFile2Add ? 'Error: image file not selected' : null
     
     if (nameErrorTag.innerHTML || summaryErrorTag.innerHTML 
-            || priceErrorTag.innerHTML || imageErrorTag.innerHTML) {
+            || priceErrorTag.innerHTML || quantityErrorTag.innerHTML || imageErrorTag.innerHTML) {
                 return
             }
 
@@ -65,8 +72,9 @@ async function addProduct() {
         const image_url = await taskSnapshot.ref.getDownloadURL()
 
         price = Number(price)
+        quantity = Number(quantity)
        await firebase.firestore().collection(COLLECTION).doc()
-                .set({name, summary, price, image, image_url})
+                .set({name, summary, price,quantity, image, image_url})
         
          // console.log('image_url', image_url)
          glPageContent.innerHTML =`

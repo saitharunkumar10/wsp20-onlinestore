@@ -18,3 +18,10 @@ function validate_price(price){
     else
         return null
 }
+
+function validate_quantity(quantity){
+    if(!parseFloat(quantity))
+        return `Error: Invalid quantity value ${quantity}`
+    else
+        return null
+}
