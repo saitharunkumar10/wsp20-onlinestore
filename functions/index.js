@@ -119,7 +119,6 @@ app.post('/b/next',auth,async(req,res)=>{
     try{
         let products = []
         const snapshot = await coll.orderBy("name").startAfter(end.data().name).limit(10).get()
-        //const snapshot = await coll.orderBy("name").startAfter(end).limit(2).get()
         snapshot.forEach(doc =>{
            products.push({id: doc.id, data: doc.data()})
 

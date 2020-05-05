@@ -10,35 +10,35 @@ admin.initializeApp({
 
 const Constants = require('./myconstants.js')
 
-const updateVerifyStatus = (token) => {
-    const db = admin.firestore();
-    db.collection(Constants.COLL_USERSTOKEN).where("token", "==", token)
-  .get()
-  .then(function(querySnapshot) {
-      querySnapshot.forEach(function(doc) {
-          db.collection(Constants.COLL_USERSTOKEN).doc(doc.id).update({isVerified: true});
-      });
- })
-}
+// const updateVerifyStatus = (token) => {
+//     const db = admin.firestore();
+//     db.collection(Constants.COLL_USERSTOKEN).where("token", "==", token)
+//   .get()
+//   .then(function(querySnapshot) {
+//       querySnapshot.forEach(function(doc) {
+//           db.collection(Constants.COLL_USERSTOKEN).doc(doc.id).update({isVerified: true});
+//       });
+//  })
+// }
 
-const verfyUser = async(user) => {
-    const token = uniqid();
-    let payload = {
-        token: token,
-        userId: user.uid,
-        user: {email: user.email, name: user.displayName},
-        isVerified: false
-    }
-    console.log("Payload:", payload);
-    const db = admin.firestore();
-    await db.collection(Constants.COLL_USERSTOKEN).doc(user.uid).set(payload);
-    await mailer.send({
-        action: "verify_email",
-        send_to: user.email,
-        subject: "Verify Email!",
-        data: {name:user.displayName, token: token},
-    });
-}
+// const verifyUser = async(user) => {
+//     const token = uniqid();
+//     let payload = {
+//         token: token,
+//         userId: user.uid,
+//         user: {email: user.email, name: user.displayName},
+//         isVerified: false
+//     }
+//     console.log("Payload:", payload);
+//     const db = admin.firestore();
+//     await db.collection(Constants.COLL_USERSTOKEN).doc(user.uid).set(payload);
+//     await mailer.send({
+//         action: "verify_email",
+//         send_to: user.email,
+//         subject: "Verify Email!",
+//         data: {name:user.displayName, token: token},
+//     });
+// }
 async function createUser(req, res){
     const email = req.body.email
     const password = req.body.password
